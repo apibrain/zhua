@@ -162,8 +162,9 @@
     </div>
 
     <script type="text/javascript">
-        var el = document.getElementById('dropzone');
-        el.addEventListener('drop', function(evt) {
+        var PI = 3.14159263;
+        var el = '#dz';
+        el.addEventListener('dropover', function(evt) {
             var file = evt.dataTransfer.file[0];
             file.readDataAsURL();
             file.onload = function(img) {
@@ -175,6 +176,7 @@
             console.log('当前地理位置纬度：' + pos.coords.latitude);
             console.log('当前地理位置经度：' + pos.coords.longitude);
             console.log('当前经纬度的精度：' + pos.coords.accuracy);
+            console.log('ending...');
         });
     </script>
 </body>
