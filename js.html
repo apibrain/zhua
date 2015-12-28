@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script src="js/jquery.js"></script>
+    <title>JS Demo</title>
+    <style type="text/css">
+        body {
+            font-size: 14px;
+            font-family: Arial, Helvetica;
+        }
+        .container {
+            width: 866px;
+            margin: 0 auto;
+        }
+        .title {
+            text-align: center;
+            border-bottom: 1px solid #999;
+            margin: 2em 0;
+            padding-bottom: 1em;
+        }
+        .center {
+            text-align: center;
+        }
+        .dropzone {
+            width: 360px;
+            height: 360px;
+            background: #f7f7f7;
+            border: 2px dashed #999;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function even(n) {
+            return n % 2 == 0;
+        }
+        var ns = [1, 2, 3, 4, 5, 6];
+        var h = ns.map(function(x) {
+            return x * x;
+        });
+        var g = ns.filter(even);
+
+        var k = ns.reduce(function(a, b) {
+            return a + b;
+        });
+
+        // Blob Object
+        function makePNG(pngData) {
+            var BlobBuilder = window.BlobBuilder || window.MozBlobBuilder || window.WebKitBlobBuilder;
+            var blob = new BlobBuilder();
+            blob.append(pngData);
+            var url = blob.getBlob('image/png').createObjectURL();
+            return url;
+        }
+
+        // Ajax Upload
+        function upload(files) {
+            var uploadBlob = function uploadBlob(files, onload) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', params.url, true);
+                xhr.onload = onload;
+                xhr.send(files);
+            }
+
+            var formData = new FormData();
+            files.map(function(file) {
+                formData.append(file.fileName, file)
+                return file;
+            });
+
+            uploadBlob(files, function() {
+                alert("Upload Finished!");
+            });
+        }
+
+        (function() {
+            var toArray = function toArray(files) {
+                var output = [];
+                for (var i = 0, f; f = files[i]; i += 1) {
+                    output.push(f);
+                }
+                return output;
+            }
+
+            var updateProgress = function (state) {
+                var progress = $('progress#progress');
+                progress.attr('max', 100);
+                if (state == 'start') {
+                    return progress.fadeIn(500);
+                } else if (state == 'stop') {
+                    return progress.fadeOut(500);
+                }
+                return progress.attr('value', state);
+            }
+
+            var uploadBlob = function uploadBlob(params) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', params.url, true);
+                xhr.onload = params.success;
+
+                // 监听上传进度
+                xhr.upload.onprogress = params.progress;
+
+                xhr.send(params.blob);
+                return params;
+            }
+
+            var fileupload = function fileupload() {
+                var el = document.getElementById('dropzone');
+                var stopEvent = function(evt) {
+                    evt.stopPropagation();
+                    evt.preventDefault();
+                }
+                el.addEventListener('dragovr', stopEvent, false);
+
+                el.addEventListener('drop', function(evt) {
+                    stopEvent(evt);
+
+                    var files = toArray(evt.dataTransfer.files);
+
+                    updateProgress('start');
+
+                    var packageFiles = function(files) {
+                        var formData = new FormData();
+                        files.map(function(file) {
+                            formData.append(file.fileName, file);
+                            return file;
+                        });
+
+                        var block = {
+                            url: '/upload.php',
+                            success: function() {
+                                updateProgress('stop');
+                            },
+                            progress: function(evt) {
+                                updateProgress(100 * (evt.loaded / evt.total));
+                            },
+                            blob: formData
+                        }
+                        return block;
+                    };
+                    uploadBlob(packageFiles(files));
+                }, false);
+            };
+        }());
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="title">JS Demo</h1>
+        <div class="content">
+            <progress id="progress" value="23" max="100">
+                <span>running</span>
+            </progress>
+            <meter min="0" value="23" high="80" low="30" optimum="60" max="100">
+                <span>20%</span>
+            </meter>
+            <div id="dropzone" class="dropzone"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var el = document.getElementById('dropzone');
+        el.addEventListener('drop', function(evt) {
+            var file = evt.dataTransfer.file[0];
+            file.readDataAsURL();
+            file.onload = function(img) {
+                $('div.images').append('<img>').attr({src: img});
+            }
+        });
+
+        window.navigator.geolocation.getCurrentPosition(function(pos) {
+            console.log('当前地理位置纬度：' + pos.coords.latitude);
+            console.log('当前地理位置经度：' + pos.coords.longitude);
+            console.log('当前经纬度的精度：' + pos.coords.accuracy);
+        });
+    </script>
+</body>
+</html>
